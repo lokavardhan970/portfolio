@@ -9,6 +9,19 @@ export default function App() {
   // Dropdown is already open by default
   const [isBioOpen, setIsBioOpen] = useState(false);
   const [formStatus, setFormStatus] = useState('idle'); // 'idle' | 'submitting' | 'success' | 'error'
+  const isAndroid = typeof navigator !== 'undefined' && /Android/i.test(navigator.userAgent);
+
+  const androidIntentUrl =
+    'intent:#Intent;' +
+    'action=android.intent.action.INSERT;' +
+    'type=vnd.android.cursor.dir/contact;' +
+    'S.name=Dr.%20Harikrishna%20Osuru;' +
+    'S.phone=%2B17329868131;' +
+    'S.email=support%40atidinricare.com;' +
+    'S.company=AtidiNRI%20Care;' +
+    'S.job_title=Founder%20%26%20CEO;' +
+    'S.notes=https%3A%2F%2Fatidinricare.com;' +
+    'end';
 
   const handleFormSubmit = async (e) => {
     e.preventDefault();
@@ -30,29 +43,6 @@ export default function App() {
       }
     } catch {
       setFormStatus('error');
-    }
-  };
-
-  const handleSaveContact = (e) => {
-    const isAndroid = /Android/i.test(navigator.userAgent);
-    if (isAndroid) {
-      // Try opening native Android Contacts editor directly
-      const intentUrl =
-        'intent:#Intent;' +
-        'action=android.intent.action.INSERT;' +
-        'type=vnd.android.cursor.dir/contact;' +
-        'S.name=' + encodeURIComponent('Dr. Harikrishna Osuru') + ';' +
-        'S.phone=' + encodeURIComponent('+17329868131') + ';' +
-        'S.email=' + encodeURIComponent('support@atidinricare.com') + ';' +
-        'S.company=' + encodeURIComponent('AtidiNRI Care') + ';' +
-        'S.job_title=' + encodeURIComponent('Founder & CEO') + ';' +
-        'end';
-
-      try {
-        window.location.href = intentUrl;
-      } catch {
-        // Fallback to standard vCard download
-      }
     }
   };
 
@@ -148,9 +138,8 @@ export default function App() {
             <div className="mt-auto pt-4 border-t border-orange-100/60">
               {/* Save to Contacts Button */}
               <a
-                href="/contact.vcf"
-                download="Dr_Harikrishna_Osuru.vcf"
-                onClick={handleSaveContact}
+                href={isAndroid ? androidIntentUrl : "/contact.vcf"}
+                {...(!isAndroid ? { download: "Dr_Harikrishna_Osuru.vcf" } : {})}
                 className="w-full py-3.5 px-4 mb-3 bg-gradient-to-r from-[#FF4500] to-[#FF6B00] hover:opacity-95 active:scale-[0.99] text-white font-bold rounded-2xl text-xs uppercase tracking-wider flex items-center justify-center gap-2 shadow-lg shadow-[#FF4500]/20 transition-all cursor-pointer"
               >
                 <UserPlus className="w-4 h-4" />
