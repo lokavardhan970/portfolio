@@ -1,12 +1,37 @@
 import React, { useState } from 'react';
 import {
   Instagram, Facebook, Linkedin, Twitter, MessageCircle,
-  Apple, ArrowUpRight, Send, ShieldCheck, Mail, Phone, ChevronDown, ChevronUp
+  Apple, ArrowUpRight, Send, ShieldCheck, Mail, Phone, ChevronDown, ChevronUp,
+  CheckCircle2, Loader2
 } from 'lucide-react';
 
 export default function App() {
   // Dropdown is already open by default
   const [isBioOpen, setIsBioOpen] = useState(false);
+  const [formStatus, setFormStatus] = useState('idle'); // 'idle' | 'submitting' | 'success' | 'error'
+
+  const handleFormSubmit = async (e) => {
+    e.preventDefault();
+    setFormStatus('submitting');
+    const formData = new FormData(e.target);
+    try {
+      const response = await fetch('https://formspree.io/f/xwlewlwp', {
+        method: 'POST',
+        body: formData,
+        headers: {
+          Accept: 'application/json',
+        },
+      });
+      if (response.ok) {
+        setFormStatus('success');
+        e.target.reset();
+      } else {
+        setFormStatus('error');
+      }
+    } catch {
+      setFormStatus('error');
+    }
+  };
 
   return (
     <div className="min-h-screen w-full bg-[#FFF9F5] font-sans text-slate-700 flex flex-col relative selection:bg-[#FF4500] selection:text-white overflow-x-hidden scroll-smooth">
@@ -245,59 +270,94 @@ export default function App() {
               <p className="text-slate-500 text-xs mt-0.5 font-medium">Send an inquiry directly to the executive office.</p>
             </div>
 
-            <form action="https://formspree.io/f/YOUR_FORMSPREE_ID" method="POST" className="flex flex-col flex-grow justify-between gap-3">
-              <div className="grid grid-cols-2 gap-3">
+            {formStatus === 'success' ? (
+              <div className="flex-grow flex flex-col items-center justify-center text-center p-6 bg-[#FFF9F5] rounded-2xl border border-orange-100">
+                <div className="w-14 h-14 rounded-full bg-green-100 text-green-600 flex items-center justify-center mb-3 shadow-sm">
+                  <CheckCircle2 className="w-8 h-8" />
+                </div>
+                <h4 className="text-lg font-bold text-slate-900 mb-1">Inquiry Received!</h4>
+                <p className="text-xs text-slate-600 mb-5 max-w-xs">
+                  Thank you for reaching out. We have received your message and will get back to you shortly.
+                </p>
+                <button
+                  type="button"
+                  onClick={() => setFormStatus('idle')}
+                  className="px-5 py-2.5 bg-gradient-to-r from-[#FF4500] to-[#FF6B00] text-white font-bold rounded-xl text-xs uppercase tracking-wider hover:opacity-90 transition-all cursor-pointer shadow-sm"
+                >
+                  Send Another Message
+                </button>
+              </div>
+            ) : (
+              <form onSubmit={handleFormSubmit} action="https://formspree.io/f/xwlewlwp" method="POST" className="flex flex-col flex-grow justify-between gap-3">
+                {formStatus === 'error' && (
+                  <div className="p-3 bg-red-50 border border-red-200 text-red-700 rounded-xl text-xs font-medium">
+                    Something went wrong sending your message. Please try again or reach out directly via email.
+                  </div>
+                )}
+
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">First Name</label>
+                    <input
+                      type="text"
+                      name="firstName"
+                      placeholder="John"
+                      required
+                      className="w-full bg-[#FFF9F5] border border-orange-100/80 rounded-xl px-3.5 py-2.5 text-sm text-slate-900 placeholder-slate-400 focus:border-[#FF4500] focus:bg-white outline-none transition-colors shadow-sm"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Last Name</label>
+                    <input
+                      type="text"
+                      name="lastName"
+                      placeholder="Doe"
+                      required
+                      className="w-full bg-[#FFF9F5] border border-orange-100/80 rounded-xl px-3.5 py-2.5 text-sm text-slate-900 placeholder-slate-400 focus:border-[#FF4500] focus:bg-white outline-none transition-colors shadow-sm"
+                    />
+                  </div>
+                </div>
+
                 <div>
-                  <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">First Name</label>
+                  <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Email Address</label>
                   <input
-                    type="text"
-                    name="firstName"
-                    placeholder="John"
+                    type="email"
+                    name="email"
+                    placeholder="john@example.com"
                     required
                     className="w-full bg-[#FFF9F5] border border-orange-100/80 rounded-xl px-3.5 py-2.5 text-sm text-slate-900 placeholder-slate-400 focus:border-[#FF4500] focus:bg-white outline-none transition-colors shadow-sm"
                   />
                 </div>
-                <div>
-                  <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Last Name</label>
-                  <input
-                    type="text"
-                    name="lastName"
-                    placeholder="Doe"
+
+                <div className="flex-grow flex flex-col relative">
+                  <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Message</label>
+                  <textarea
+                    name="message"
+                    placeholder="How can we assist you?"
                     required
-                    className="w-full bg-[#FFF9F5] border border-orange-100/80 rounded-xl px-3.5 py-2.5 text-sm text-slate-900 placeholder-slate-400 focus:border-[#FF4500] focus:bg-white outline-none transition-colors shadow-sm"
-                  />
+                    className="w-full h-28 sm:h-full min-h-[100px] bg-[#FFF9F5] border border-orange-100/80 rounded-xl px-3.5 py-2.5 text-sm text-slate-900 placeholder-slate-400 focus:border-[#FF4500] focus:bg-white outline-none resize-none transition-colors shadow-sm"
+                  ></textarea>
                 </div>
-              </div>
 
-              <div>
-                <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Email Address</label>
-                <input
-                  type="email"
-                  name="email"
-                  placeholder="john@example.com"
-                  required
-                  className="w-full bg-[#FFF9F5] border border-orange-100/80 rounded-xl px-3.5 py-2.5 text-sm text-slate-900 placeholder-slate-400 focus:border-[#FF4500] focus:bg-white outline-none transition-colors shadow-sm"
-                />
-              </div>
-
-              <div className="flex-grow flex flex-col relative">
-                <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Message</label>
-                <textarea
-                  name="message"
-                  placeholder="How can we assist you?"
-                  required
-                  className="w-full h-28 sm:h-full min-h-[100px] bg-[#FFF9F5] border border-orange-100/80 rounded-xl px-3.5 py-2.5 text-sm text-slate-900 placeholder-slate-400 focus:border-[#FF4500] focus:bg-white outline-none resize-none transition-colors shadow-sm"
-                ></textarea>
-              </div>
-
-              <button
-                type="submit"
-                className="w-full py-3.5 mt-1 bg-gradient-to-r from-[#FF4500] to-[#FF6B00] hover:opacity-90 active:scale-[0.99] text-white font-bold rounded-xl text-xs uppercase tracking-wider flex items-center justify-center gap-2 transition-all cursor-pointer shadow-md"
-              >
-                <Send className="w-4 h-4" />
-                Send Inquiry
-              </button>
-            </form>
+                <button
+                  type="submit"
+                  disabled={formStatus === 'submitting'}
+                  className="w-full py-3.5 mt-1 bg-gradient-to-r from-[#FF4500] to-[#FF6B00] hover:opacity-90 active:scale-[0.99] disabled:opacity-60 disabled:cursor-not-allowed text-white font-bold rounded-xl text-xs uppercase tracking-wider flex items-center justify-center gap-2 transition-all cursor-pointer shadow-md"
+                >
+                  {formStatus === 'submitting' ? (
+                    <>
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                      Sending...
+                    </>
+                  ) : (
+                    <>
+                      <Send className="w-4 h-4" />
+                      Send Inquiry
+                    </>
+                  )}
+                </button>
+              </form>
+            )}
           </div>
 
         </div>
