@@ -33,11 +33,10 @@ export default function App() {
     }
   };
 
-  const handleSaveContact = () => {
+  const handleSaveContact = (e) => {
     const isAndroid = /Android/i.test(navigator.userAgent);
-
     if (isAndroid) {
-      // Direct Android system intent: opens the phone's native Contacts app with prefilled info (No download required)
+      // Try opening native Android Contacts editor directly
       const intentUrl =
         'intent:#Intent;' +
         'action=android.intent.action.INSERT;' +
@@ -47,35 +46,14 @@ export default function App() {
         'S.email=' + encodeURIComponent('support@atidinricare.com') + ';' +
         'S.company=' + encodeURIComponent('AtidiNRI Care') + ';' +
         'S.job_title=' + encodeURIComponent('Founder & CEO') + ';' +
-        'S.notes=' + encodeURIComponent('https://atidinricare.com') + ';' +
         'end';
 
-      window.location.href = intentUrl;
-      return;
+      try {
+        window.location.href = intentUrl;
+      } catch {
+        // Fallback to standard vCard download
+      }
     }
-
-    // For iOS / Desktop: triggers direct contact card addition
-    const vcard = `BEGIN:VCARD
-VERSION:3.0
-N:Osuru;Harikrishna;;Dr.;
-FN:Dr. Harikrishna Osuru
-ORG:AtidiNRI Care
-TITLE:Founder & CEO
-TEL;TYPE=CELL,VOICE:+17329868131
-EMAIL;TYPE=WORK:support@atidinricare.com
-URL:https://atidinricare.com
-NOTE:Founder & CEO at AtidiNRI Care - Premium Cross-Border Healthcare & Dental Care Services for NRIs
-END:VCARD`;
-
-    const blob = new Blob([vcard], { type: 'text/vcard;charset=utf-8;' });
-    const url = window.URL.createObjectURL(blob);
-    const link = document.createElement('a');
-    link.href = url;
-    link.setAttribute('download', 'Dr_Harikrishna_Osuru.vcf');
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    window.URL.revokeObjectURL(url);
   };
 
   return (
@@ -169,14 +147,15 @@ END:VCARD`;
             {/* Contact Actions Area */}
             <div className="mt-auto pt-4 border-t border-orange-100/60">
               {/* Save to Contacts Button */}
-              <button
-                type="button"
+              <a
+                href="/contact.vcf"
+                download="Dr_Harikrishna_Osuru.vcf"
                 onClick={handleSaveContact}
                 className="w-full py-3.5 px-4 mb-3 bg-gradient-to-r from-[#FF4500] to-[#FF6B00] hover:opacity-95 active:scale-[0.99] text-white font-bold rounded-2xl text-xs uppercase tracking-wider flex items-center justify-center gap-2 shadow-lg shadow-[#FF4500]/20 transition-all cursor-pointer"
               >
                 <UserPlus className="w-4 h-4" />
                 Add to Contacts
-              </button>
+              </a>
 
               {/* Quick Actions (Call, WhatsApp, Email) */}
               <div className="grid grid-cols-3 gap-2.5 sm:gap-3">
