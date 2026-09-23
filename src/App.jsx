@@ -10,16 +10,6 @@ export default function App() {
   const [isBioOpen, setIsBioOpen] = useState(false);
   const [formStatus, setFormStatus] = useState('idle'); // 'idle' | 'submitting' | 'success' | 'error'
 
-  const androidIntentUrl =
-    'intent:#Intent;' +
-    'action=android.intent.action.INSERT;' +
-    'type=vnd.android.cursor.dir/contact;' +
-    'S.name=Dr.%20Harikrishna%20Osuru;' +
-    'S.phone=%2B17329868131;' +
-    'S.email=support%40atidinricare.com;' +
-    'S.company=AtidiNRI%20Care;' +
-    'S.job_title=Founder%20%26%20CEO;' +
-    'end';
 
   const handleFormSubmit = async (e) => {
     e.preventDefault();
@@ -41,6 +31,30 @@ export default function App() {
       }
     } catch {
       setFormStatus('error');
+    }
+  };
+
+  const handleSaveContact = (e) => {
+    const ua = navigator.userAgent || '';
+    const isAndroid = /Android/i.test(ua);
+
+    if (isAndroid) {
+      e.preventDefault();
+      const name = "Dr. Harikrishna Osuru";
+      const phone = "+17329868131";
+      const fallbackUrl = window.location.origin + "/Dr_Harikrishna_Osuru.vcf";
+
+      const intentUrl =
+        "intent://contacts/insert" +
+        "?name=" + encodeURIComponent(name) +
+        "&phone=" + encodeURIComponent(phone) +
+        "#Intent;" +
+        "scheme=content;" +
+        "package=com.android.contacts;" +
+        "S.browser_fallback_url=" + encodeURIComponent(fallbackUrl) + ";" +
+        "end";
+
+      window.location.href = intentUrl;
     }
   };
 
@@ -136,20 +150,9 @@ export default function App() {
             <div className="mt-auto pt-4 border-t border-orange-100/60">
               {/* Save to Contacts Button */}
               <a
-                href={androidIntentUrl}
-                onClick={(e) => {
-                  const ua = navigator.userAgent || '';
-                  const isAndroidDevice = /Android/i.test(ua);
-                  if (!isAndroidDevice) {
-                    e.preventDefault();
-                    const link = document.createElement('a');
-                    link.href = '/contact.vcf';
-                    link.setAttribute('download', 'Dr_Harikrishna_Osuru.vcf');
-                    document.body.appendChild(link);
-                    link.click();
-                    document.body.removeChild(link);
-                  }
-                }}
+                href="/Dr_Harikrishna_Osuru.vcf"
+                download="Dr_Harikrishna_Osuru.vcf"
+                onClick={handleSaveContact}
                 className="w-full py-3.5 px-4 mb-3 bg-gradient-to-r from-[#FF4500] to-[#FF6B00] hover:opacity-95 active:scale-[0.99] text-white font-bold rounded-2xl text-xs uppercase tracking-wider flex items-center justify-center gap-2 shadow-lg shadow-[#FF4500]/20 transition-all cursor-pointer"
               >
                 <UserPlus className="w-4 h-4" />
