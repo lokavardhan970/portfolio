@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import {
   Instagram, Facebook, Linkedin, Twitter, MessageCircle,
   Apple, ArrowUpRight, Send, ShieldCheck, Mail, Phone, ChevronDown, ChevronUp,
-  CheckCircle2, Loader2
+  CheckCircle2, Loader2, UserPlus
 } from 'lucide-react';
 
 export default function App() {
@@ -31,6 +31,51 @@ export default function App() {
     } catch {
       setFormStatus('error');
     }
+  };
+
+  const handleSaveContact = () => {
+    const isAndroid = /Android/i.test(navigator.userAgent);
+
+    if (isAndroid) {
+      // Direct Android system intent: opens the phone's native Contacts app with prefilled info (No download required)
+      const intentUrl =
+        'intent:#Intent;' +
+        'action=android.intent.action.INSERT;' +
+        'type=vnd.android.cursor.dir/contact;' +
+        'S.name=' + encodeURIComponent('Dr. Harikrishna Osuru') + ';' +
+        'S.phone=' + encodeURIComponent('+17329868131') + ';' +
+        'S.email=' + encodeURIComponent('support@atidinricare.com') + ';' +
+        'S.company=' + encodeURIComponent('AtidiNRI Care') + ';' +
+        'S.job_title=' + encodeURIComponent('Founder & CEO') + ';' +
+        'S.notes=' + encodeURIComponent('https://atidinricare.com') + ';' +
+        'end';
+
+      window.location.href = intentUrl;
+      return;
+    }
+
+    // For iOS / Desktop: triggers direct contact card addition
+    const vcard = `BEGIN:VCARD
+VERSION:3.0
+N:Osuru;Harikrishna;;Dr.;
+FN:Dr. Harikrishna Osuru
+ORG:AtidiNRI Care
+TITLE:Founder & CEO
+TEL;TYPE=CELL,VOICE:+17329868131
+EMAIL;TYPE=WORK:support@atidinricare.com
+URL:https://atidinricare.com
+NOTE:Founder & CEO at AtidiNRI Care - Premium Cross-Border Healthcare & Dental Care Services for NRIs
+END:VCARD`;
+
+    const blob = new Blob([vcard], { type: 'text/vcard;charset=utf-8;' });
+    const url = window.URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.setAttribute('download', 'Dr_Harikrishna_Osuru.vcf');
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    window.URL.revokeObjectURL(url);
   };
 
   return (
@@ -121,34 +166,46 @@ export default function App() {
               )}
             </div>
 
-            {/* Bottom Action Buttons */}
-            <div className="grid grid-cols-3 gap-2.5 sm:gap-3 mt-auto pt-4 border-t border-orange-100/60">
-
-              <a
-                href="tel:+17329868131"
-                className="flex flex-col items-center justify-center gap-1.5 py-3 rounded-2xl border border-orange-100/80 bg-[#FFF9F5] hover:border-[#FF4500] transition-colors group shadow-sm cursor-pointer"
+            {/* Contact Actions Area */}
+            <div className="mt-auto pt-4 border-t border-orange-100/60">
+              {/* Save to Contacts Button */}
+              <button
+                type="button"
+                onClick={handleSaveContact}
+                className="w-full py-3.5 px-4 mb-3 bg-gradient-to-r from-[#FF4500] to-[#FF6B00] hover:opacity-95 active:scale-[0.99] text-white font-bold rounded-2xl text-xs uppercase tracking-wider flex items-center justify-center gap-2 shadow-lg shadow-[#FF4500]/20 transition-all cursor-pointer"
               >
-                <Phone className="w-4 h-4 text-[#FF4500] group-hover:scale-105 transition-transform" />
-                <span className="text-[10px] font-bold text-slate-700 uppercase tracking-wider">Call</span>
-              </a>
+                <UserPlus className="w-4 h-4" />
+                Add to Contacts
+              </button>
 
-              <a
-                href="https://wa.me/17329868131"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="flex flex-col items-center justify-center gap-1.5 py-3 rounded-2xl border border-orange-100/80 bg-[#FFF9F5] hover:border-green-500 transition-colors group shadow-sm"
-              >
-                <MessageCircle className="w-4 h-4 text-green-600 group-hover:scale-105 transition-transform" />
-                <span className="text-[10px] font-bold text-slate-700 uppercase tracking-wider">WhatsApp</span>
-              </a>
+              {/* Quick Actions (Call, WhatsApp, Email) */}
+              <div className="grid grid-cols-3 gap-2.5 sm:gap-3">
+                <a
+                  href="tel:+17329868131"
+                  className="flex flex-col items-center justify-center gap-1.5 py-3 rounded-2xl border border-orange-100/80 bg-[#FFF9F5] hover:border-[#FF4500] transition-colors group shadow-sm cursor-pointer"
+                >
+                  <Phone className="w-4 h-4 text-[#FF4500] group-hover:scale-105 transition-transform" />
+                  <span className="text-[10px] font-bold text-slate-700 uppercase tracking-wider">Call</span>
+                </a>
 
-              <a
-                href="mailto:support@atidinricare.com"
-                className="flex flex-col items-center justify-center gap-1.5 py-3 rounded-2xl border border-orange-100/80 bg-[#FFF9F5] hover:border-[#FF4500] transition-colors group shadow-sm"
-              >
-                <Mail className="w-4 h-4 text-[#FF4500] group-hover:scale-105 transition-transform" />
-                <span className="text-[10px] font-bold text-slate-700 uppercase tracking-wider">Email</span>
-              </a>
+                <a
+                  href="https://wa.me/17329868131"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex flex-col items-center justify-center gap-1.5 py-3 rounded-2xl border border-orange-100/80 bg-[#FFF9F5] hover:border-green-500 transition-colors group shadow-sm"
+                >
+                  <MessageCircle className="w-4 h-4 text-green-600 group-hover:scale-105 transition-transform" />
+                  <span className="text-[10px] font-bold text-slate-700 uppercase tracking-wider">WhatsApp</span>
+                </a>
+
+                <a
+                  href="mailto:support@atidinricare.com"
+                  className="flex flex-col items-center justify-center gap-1.5 py-3 rounded-2xl border border-orange-100/80 bg-[#FFF9F5] hover:border-[#FF4500] transition-colors group shadow-sm"
+                >
+                  <Mail className="w-4 h-4 text-[#FF4500] group-hover:scale-105 transition-transform" />
+                  <span className="text-[10px] font-bold text-slate-700 uppercase tracking-wider">Email</span>
+                </a>
+              </div>
             </div>
           </div>
 
